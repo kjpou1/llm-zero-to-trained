@@ -12,6 +12,8 @@ Unlike simply running code from the reference repo, the goal here is to **unders
   - [🧠 Learning Sources](#-learning-sources)
   - [🗒️ Progress Log](#️-progress-log)
   - [🔧 Getting Started](#-getting-started)
+    - [🧰 Environment Setup (with `uv`)](#-environment-setup-with-uv)
+    - [🚀 Start Building](#-start-building)
   - [📚 References \& Inspirations](#-references--inspirations)
   - [📜 License](#-license)
 
@@ -64,11 +66,47 @@ Check [`PROGRESS.md`](PROGRESS.md) for detailed notes and milestones.
 Clone this repo, then explore and build each component:
 
 ```bash
-git clone <your-repo-url>
+git clone https://github.com/kjpou1/llm-zero-to-trained.git
 cd llm-zero-to-trained
-````
+```
 
-Start with `notebooks/01_data_preparation.ipynb` or dive into `tokenizer/` to begin implementing!
+---
+
+### 🧰 Environment Setup (with `uv`)
+
+This project uses [`uv`](https://github.com/astral-sh/uv) for dependency management and reproducible environments.
+
+1. **Install `uv`**
+   👉 Follow the instructions here:
+   [https://docs.astral.sh/uv/getting-started/installation/](https://docs.astral.sh/uv/getting-started/installation/)
+
+2. **Create and activate your virtual environment**:
+
+```bash
+uv venv
+source .venv/bin/activate  # macOS/Linux
+# OR
+.venv\Scripts\activate     # Windows
+```
+
+3. **Sync dependencies**:
+
+```bash
+uv sync
+```
+
+This installs all required packages and generates a `uv.lock` file for reproducibility.
+
+---
+
+### 🚀 Start Building
+
+Begin with:
+
+* `notebooks/01_data_preparation.ipynb` – for exploring the dataset and tokenizer
+* `tokenizer/` – to start implementing your own tokenizer logic
+* `model/` – when you're ready to dive into Transformers
+
 
 ---
 
