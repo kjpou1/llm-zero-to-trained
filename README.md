@@ -6,6 +6,17 @@ Unlike simply running code from the reference repo, the goal here is to **unders
 
 ---
 
+- [LLM: Zero to Trained](#llm-zero-to-trained)
+  - [🎯 Objective](#-objective)
+  - [📁 Project Structure](#-project-structure)
+  - [🧠 Learning Sources](#-learning-sources)
+  - [🗒️ Progress Log](#️-progress-log)
+  - [🔧 Getting Started](#-getting-started)
+  - [📚 References \& Inspirations](#-references--inspirations)
+  - [📜 License](#-license)
+
+---
+
 ## 🎯 Objective
 
 To develop a working LLM from first principles by:
