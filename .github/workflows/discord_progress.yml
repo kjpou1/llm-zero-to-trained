@@ -1,0 +1,28 @@
+name: Notify Discord on PROGRESS.md Updates
+
+on:
+  push:
+    paths:
+      - 'PROGRESS.md'
+
+jobs:
+  notify-discord:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+
+      - name: Read PROGRESS.md and post to Discord
+        env:
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_PROGRESS_WEBHOOK }}
+        run: |
+          echo "Preparing message..."
+          CONTENT=$(cat PROGRESS.md | tail -n 20 | sed 's/"/\\"/g')
+          
+          JSON_PAYLOAD=$(jq -n --arg content "$CONTENT" '{content: $content}')
+
+          echo "Posting to Discord..."
+          curl -X POST -H "Content-Type: application/json" \
+            -d "$JSON_PAYLOAD" \
+            "$DISCORD_WEBHOOK"
