@@ -1,3 +1,3 @@
 # Progress Log
 
-- [ ] Project initialized
+- [x] Project initialized
