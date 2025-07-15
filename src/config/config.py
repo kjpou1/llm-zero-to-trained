@@ -67,6 +67,26 @@ class Config(metaclass=SingletonMeta):
 
         print(f"[Config] Loaded YAML config: {path}")
 
+    @property
+    def config_path(self):
+        return self._config_path
+
+    @config_path.setter
+    def config_path(self, value):
+        if not isinstance(value, str):
+            raise ValueError("config_path must be a string.")
+        self._config_path = value
+
+    @property
+    def debug(self):
+        return self._debug
+
+    @debug.setter
+    def debug(self, value):
+        if not isinstance(value, bool):
+            raise ValueError("debug must be a boolean.")
+        self._debug = value
+
     def print_config_info(self):
         print("=" * 50)
         print("📂 Configured Dataset Directories")
