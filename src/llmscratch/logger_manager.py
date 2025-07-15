@@ -5,8 +5,8 @@ import sys
 from datetime import datetime
 from logging.handlers import RotatingFileHandler
 
-from src.config.config import Config
-from src.core.log_formatters import RelativePathFormatter
+from llmscratch.config.config import Config
+from llmscratch.core.log_formatters import RelativePathFormatter
 
 
 class LoggerManager:

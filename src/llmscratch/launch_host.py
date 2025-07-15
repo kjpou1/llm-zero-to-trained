@@ -7,9 +7,9 @@ creating a Host instance, and launching its main logic asynchronously.
 
 import asyncio
 
-from src.host import Host
-from src.logger_manager import LoggerManager
-from src.runtime.command_line import CommandLine
+from llmscratch.host import Host
+from llmscratch.logger_manager import LoggerManager
+from llmscratch.runtime.command_line import CommandLine
 
 logging = LoggerManager.get_logger(__name__)
 

@@ -1,6 +1,6 @@
 from argparse import ArgumentParser
 
-from src.logger_manager import LoggerManager
+from llmscratch.logger_manager import LoggerManager
 
 logging = LoggerManager.get_logger(__name__)
 

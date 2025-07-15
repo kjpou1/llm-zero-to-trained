@@ -1,9 +1,9 @@
 import asyncio
 
-from src.config.config import Config
-from src.exception import CustomException
-from src.logger_manager import LoggerManager
-from src.models.command_line_args import CommandLineArgs
+from llmscratch.config.config import Config
+from llmscratch.exception import CustomException
+from llmscratch.logger_manager import LoggerManager
+from llmscratch.models.command_line_args import CommandLineArgs
 
 logging = LoggerManager.get_logger(__name__)
 

@@ -1,6 +1,6 @@
 import sys
 
-from src.models.command_line_args import CommandLineArgs
+from llmscratch.models.command_line_args import CommandLineArgs
 
 from .logging_argument_parser import LoggingArgumentParser
 

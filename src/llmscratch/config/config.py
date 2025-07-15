@@ -4,8 +4,8 @@ from typing import Optional
 import yaml
 from dotenv import load_dotenv
 
-from src.models import SingletonMeta
-from src.utils.path_utils import ensure_all_dirs_exist, get_project_root
+from llmscratch.models import SingletonMeta
+from llmscratch.utils.path_utils import ensure_all_dirs_exist, get_project_root
 
 
 class Config(metaclass=SingletonMeta):
