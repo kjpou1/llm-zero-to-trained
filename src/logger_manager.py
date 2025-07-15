@@ -5,8 +5,8 @@ import sys
 from datetime import datetime
 from logging.handlers import RotatingFileHandler
 
-from convolution_patterns.config.config import Config
-from convolution_patterns.core.log_formatters import RelativePathFormatter
+from src.config.config import Config
+from src.core.log_formatters import RelativePathFormatter
 
 
 class LoggerManager:

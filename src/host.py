@@ -1,9 +1,9 @@
 import asyncio
 
-from config.config import Config
-from exception import CustomException
-from logger_manager import LoggerManager
-from models.command_line_args import CommandLineArgs
+from src.config.config import Config
+from src.exception import CustomException
+from src.logger_manager import LoggerManager
+from src.models.command_line_args import CommandLineArgs
 
 logging = LoggerManager.get_logger(__name__)
 

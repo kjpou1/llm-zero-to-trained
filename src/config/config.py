@@ -4,8 +4,8 @@ from typing import Optional
 import yaml
 from dotenv import load_dotenv
 
-from models import SingletonMeta
-from utils.path_utils import ensure_all_dirs_exist, get_project_root
+from src.models import SingletonMeta
+from src.utils.path_utils import ensure_all_dirs_exist, get_project_root
 
 
 class Config(metaclass=SingletonMeta):
@@ -36,6 +36,7 @@ class Config(metaclass=SingletonMeta):
         self.PROCESSED_DATA_DIR = os.path.join(self.BASE_DIR, "data", "processed")
         self.METADATA_DIR = os.path.join(self.BASE_DIR, "data", "metadata")
         self.VOCABULARY = os.path.join(self.BASE_DIR, "data", "vocabulary")
+        self.LOG_DIR = os.path.join(self.BASE_DIR, "logs")
 
         self._ensure_directories_exist()
         Config._is_initialized = True
@@ -47,6 +48,7 @@ class Config(metaclass=SingletonMeta):
                 self.PROCESSED_DATA_DIR,
                 self.METADATA_DIR,
                 self.VOCABULARY,
+                self.LOG_DIR,
             ]
         )
 

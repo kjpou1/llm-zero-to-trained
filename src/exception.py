@@ -2,7 +2,7 @@ import sys
 import types
 from typing import Optional
 
-from logger_manager import LoggerManager
+from src.logger_manager import LoggerManager
 
 logging = LoggerManager.get_logger(__name__)
 

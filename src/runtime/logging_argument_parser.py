@@ -1,6 +1,6 @@
 from argparse import ArgumentParser
 
-from convolution_patterns.logger_manager import LoggerManager
+from src.logger_manager import LoggerManager
 
 logging = LoggerManager.get_logger(__name__)
 
