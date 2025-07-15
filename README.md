@@ -1,19 +1,18 @@
-# LLM: Zero to Trained
+# **LLM: Zero to Trained**
 
-This project is a fully manual, from-scratch implementation of a Large Language Model (LLM), guided by the book [**Build a Large Language Model from Scratch**](https://github.com/rasbt/LLMs-from-scratch) by Sebastian Raschka.
+> A fully manual, from-scratch implementation of a Large Language Model (LLM), guided by the book [**Build a Large Language Model from Scratch**](https://github.com/rasbt/LLMs-from-scratch) by Sebastian Raschka.
 
-Unlike simply running code from the reference repo, the goal here is to **understand and re-implement every major component** — tokenizer, model, data loader, training loop — by hand.
+Unlike simply running code from the [reference repo](https://github.com/rasbt/LLMs-from-scratch.git), this project is about **understanding and re-implementing** every major component — tokenizer, model, data loader, training loop — by hand.
 
 ---
-
-- [LLM: Zero to Trained](#llm-zero-to-trained)
+- [**LLM: Zero to Trained**](#llm-zero-to-trained)
   - [🎯 Objective](#-objective)
   - [📁 Project Structure](#-project-structure)
   - [🧠 Learning Sources](#-learning-sources)
   - [🗒️ Progress Log](#️-progress-log)
   - [🔧 Getting Started](#-getting-started)
-    - [🧰 Environment Setup (with `uv`)](#-environment-setup-with-uv)
-    - [🚀 Start Building](#-start-building)
+  - [🧰 Environment Setup (with uv)](#-environment-setup-with-uv)
+  - [🚀 CLI: Start Building](#-cli-start-building)
   - [📚 References \& Inspirations](#-references--inspirations)
   - [📜 License](#-license)
 
@@ -23,47 +22,48 @@ Unlike simply running code from the reference repo, the goal here is to **unders
 
 To develop a working LLM from first principles by:
 
-- Writing each component from scratch in Python
-- Following the structure and logic from the book
-- Validating ideas through notebooks and experiments
-- Building modular, reusable code
+* Writing each component from scratch in Python
+* Following the structure and logic from Raschka’s book
+* Validating ideas through notebooks and experiments
+* Building modular, reusable, CLI-driven code
 
 ---
 
 ## 📁 Project Structure
 
 ```
-
-notebooks/      ← Book-aligned exploration notebooks
-tokenizer/      ← BPE, WordPiece, and Unigram tokenizer implementations
-model/          ← Transformer architecture components
-data/           ← Dataset loading, preprocessing, batching utilities
-train/          ← Training loop, loss, optimizer, evaluation
-experiments/    ← Saved runs, checkpoints, metrics from training runs
-configs/        ← YAML configs for models and training (optional)
-README.md       ← This file
-PROGRESS.md     ← Running log of completed work and learnings
-
-````
+llm-zero-to-trained/
+├── src/llmscratch/        ← Modular CLI-driven Python package
+│   ├── config/            ← Config loader with .env, CLI, YAML support
+│   ├── models/            ← Core dataclasses and SingletonMeta
+│   ├── runtime/           ← CLI argument parsing and dispatch
+│   ├── launch_host.py     ← Entry point for all commands (e.g., preprocess)
+│   └── host.py            ← Command execution coordinator
+├── notebooks/             ← Book-aligned exploration notebooks
+├── configs/               ← YAML configs for datasets, vocab, etc.
+├── datasets/              ← Raw and processed tokenized data
+├── pyproject.toml         ← Project metadata and CLI definition
+├── README.md              ← This file
+└── PROGRESS.md            ← Running log of milestones
+```
 
 ---
 
 ## 🧠 Learning Sources
 
-- [LLMs-from-scratch GitHub Repo](https://github.com/rasbt/LLMs-from-scratch)
-- Book: *Build a Large Language Model from Scratch* by Sebastian Raschka
+* 📘 *Build a Large Language Model from Scratch* – Sebastian Raschka (2024)
+* 💻 [LLMs-from-scratch GitHub Repo](https://github.com/rasbt/LLMs-from-scratch)
+* 🧠 Karpathy’s [minGPT](https://github.com/karpathy/minGPT) and [nanoGPT](https://github.com/karpathy/nanoGPT) (inspirational, but not reused)
 
 ---
 
 ## 🗒️ Progress Log
 
-Check [`PROGRESS.md`](PROGRESS.md) for detailed notes and milestones.
+See [PROGRESS.md](./PROGRESS.md) for completed milestones, model checkpoints, and active development notes.
 
 ---
 
 ## 🔧 Getting Started
-
-Clone this repo, then explore and build each component:
 
 ```bash
 git clone https://github.com/kjpou1/llm-zero-to-trained.git
@@ -72,62 +72,45 @@ cd llm-zero-to-trained
 
 ---
 
-### 🧰 Environment Setup (with `uv`)
-
-This project uses [`uv`](https://github.com/astral-sh/uv) for dependency management and reproducible environments.
-
-1. **Install `uv`**
-   👉 Follow the instructions here:
-   [https://docs.astral.sh/uv/getting-started/installation/](https://docs.astral.sh/uv/getting-started/installation/)
-
-2. **Create and activate your virtual environment**:
+## 🧰 Environment Setup (with [uv](https://docs.astral.sh/uv/getting-started/installation/))
 
 ```bash
 uv venv
-source .venv/bin/activate  # macOS/Linux
+source .venv/bin/activate        # macOS/Linux
 # OR
-.venv\Scripts\activate     # Windows
-```
+.venv\Scripts\activate           # Windows
 
-3. **Sync dependencies**:
-
-```bash
+uv pip install --editable .
 uv sync
 ```
 
-This installs all required packages and generates a `uv.lock` file for reproducibility.
+> 🧪 This enables the `llmscratch` CLI from anywhere and installs all dependencies with reproducible locking via `uv`.
 
 ---
 
-### 🚀 Start Building
+## 🚀 CLI: Start Building
 
-Begin with:
+Use the CLI to run modular LLM pipelines:
 
-* `notebooks/01_data_preparation.ipynb` – for exploring the dataset and tokenizer
-* `tokenizer/` – to start implementing your own tokenizer logic
-* `model/` – when you're ready to dive into Transformers
+```bash
+llmscratch preprocess --config configs/data_config.yaml
+```
 
+More commands like `train`, `sample`, and `evaluate` will follow as the project evolves.
 
 ---
 
 ## 📚 References & Inspirations
 
-This project is built entirely from scratch, with a strong emphasis on personal understanding through implementation.
+While the architecture is influenced by great projects, all code is original and written from scratch:
 
-The main learning resource is:
-
-* [*Build a Large Language Model from Scratch* by Sebastian Raschka](https://github.com/rasbt/LLMs-from-scratch) — the primary guide followed throughout this project.
-
-Additional projects that may inform future architectural decisions:
-
-* [Karpathy’s minGPT and nanoGPT](https://github.com/karpathy/nanoGPT) — minimalist and educational GPT implementations
-* [Hugging Face Transformers](https://github.com/huggingface/transformers) — a modular, production-ready reference for LLM design
-
-These references serve as conceptual guides, but all implementation in this repository is original and written by hand.
+* [Raschka’s LLM Book](https://leanpub.com/llms-from-scratch)
+* [minGPT](https://github.com/karpathy/minGPT)
+* [nanoGPT](https://github.com/karpathy/nanoGPT)
+* [Hugging Face Transformers](https://github.com/huggingface/transformers)
 
 ---
 
 ## 📜 License
 
 This project is MIT licensed.
-
