@@ -1,0 +1,9 @@
+# config.yaml
+sequence_length: 128
+stride: 64
+special_tokens:
+  bos: 2
+  eos: 3
+remove_non_ascii: true
+save_preprocessed_output: true
+preprocessed_output_path: "artifacts/data/preprocessed_sample.csv"

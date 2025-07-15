@@ -4,6 +4,7 @@ from llmscratch.config.config import Config
 from llmscratch.exception import CustomException
 from llmscratch.logger_manager import LoggerManager
 from llmscratch.models.command_line_args import CommandLineArgs
+from llmscratch.pipelines.preprocessing_pipeline import PreprocessingPipeline
 
 logging = LoggerManager.get_logger(__name__)
 
@@ -57,8 +58,18 @@ class Host:
         """
         try:
             logging.info("📦 Running preprocessing pipeline...")
-            # TODO: Replace with actual preprocessing steps
-            # e.g., PreprocessingPipeline(config=self.config).run()
+
+            pipeline = PreprocessingPipeline()
+            # For now, test with placeholder text or load actual data
+            sample_text = "Hello world. This is a test sentence for tokenization."
+            result_df = pipeline.run(sample_text)
+
+            # Optional: save result to disk (e.g., as CSV or .npy)
+            # if self.config.save_preprocessed_output:
+            #     output_path = self.config.preprocessed_output_path
+            #     result_df.to_csv(output_path, index=False)
+            #     logging.info(f"📝 Saved output to: {output_path}")
+
             logging.info("✅ Preprocessing pipeline completed successfully.")
 
         except Exception as e:

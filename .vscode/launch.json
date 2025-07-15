@@ -23,7 +23,7 @@
       "name": "Preprocess",
       "type": "debugpy",
       "request": "launch",
-      "program": "launch_host.py",
+      "program": "src/llmscratch/launch_host.py",
       "args": ["preprocess", "--config", "configs/preprocess_config.yaml"]
     }
   ]
