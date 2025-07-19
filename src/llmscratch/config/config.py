@@ -5,6 +5,7 @@ import yaml
 from dotenv import load_dotenv
 
 from llmscratch.models import SingletonMeta
+from llmscratch.utils.arg_utils import was_explicit as _was_explicit
 from llmscratch.utils.path_utils import ensure_all_dirs_exist, get_project_root
 
 
@@ -38,6 +39,12 @@ class Config(metaclass=SingletonMeta):
         self.VOCABULARY = os.path.join(self.BASE_DIR, "data", "vocabulary")
         self.LOG_DIR = os.path.join(self.BASE_DIR, "logs")
 
+        # === Tokenizer Settings ===
+        self._tokenizer_merges = 10000
+        self._lowercase = False
+        tokenizer_dir_env = os.getenv("TOKENIZER_OUTPUT_DIR", self.VOCABULARY)
+        self._tokenizer_output_dir = self._resolve_path(tokenizer_dir_env)
+
         self._ensure_directories_exist()
         Config._is_initialized = True
 
@@ -53,7 +60,27 @@ class Config(metaclass=SingletonMeta):
         )
 
     def apply_cli_overrides(self, args):
-        pass
+        if _was_explicit(args, "debug"):
+            print(f"[Config] Overriding 'debug' from CLI: {args.debug}")
+            self.debug = args.debug
+
+        if _was_explicit(args, "tokenizer_merges"):
+            print(
+                f"[Config] Overriding 'tokenizer_merges' from CLI: {self._tokenizer_merges} → {args.tokenizer_merges}"
+            )
+            self.tokenizer_merges = args.tokenizer_merges
+
+        if _was_explicit(args, "lowercase"):
+            print(
+                f"[Config] Overriding 'lowercase' from CLI: {self._lowercase} → {args.lowercase}"
+            )
+            self.lowercase = args.lowercase
+
+        if _was_explicit(args, "tokenizer_output_dir"):
+            print(
+                f"[Config] Overriding 'tokenizer_output_dir' from CLI: {self._tokenizer_output_dir} → {args.tokenizer_output_dir}"
+            )
+            self.tokenizer_output_dir = args.tokenizer_output_dir
 
     def load_from_yaml(self, path: str):
         """
@@ -68,6 +95,28 @@ class Config(metaclass=SingletonMeta):
             data = yaml.safe_load(f) or {}
 
         print(f"[Config] Loaded YAML config: {path}")
+
+        if "debug" in data:
+            print(f"[Config] Overriding 'debug': {self._debug} → {data['debug']}")
+            self.debug = data["debug"]
+
+        if "tokenizer_merges" in data:
+            print(
+                f"[Config] Overriding 'tokenizer_merges': {self._tokenizer_merges} → {data['tokenizer_merges']}"
+            )
+            self.tokenizer_merges = data["tokenizer_merges"]
+
+        if "lowercase" in data:
+            print(
+                f"[Config] Overriding 'lowercase': {self._lowercase} → {data['lowercase']}"
+            )
+            self.lowercase = data["lowercase"]
+
+        if "tokenizer_output_dir" in data:
+            print(
+                f"[Config] Overriding 'tokenizer_output_dir': {self._tokenizer_output_dir} → {data['tokenizer_output_dir']}"
+            )
+            self.tokenizer_output_dir = data["tokenizer_output_dir"]
 
     @property
     def config_path(self):
@@ -88,6 +137,36 @@ class Config(metaclass=SingletonMeta):
         if not isinstance(value, bool):
             raise ValueError("debug must be a boolean.")
         self._debug = value
+
+    @property
+    def tokenizer_merges(self) -> int:
+        return self._tokenizer_merges
+
+    @tokenizer_merges.setter
+    def tokenizer_merges(self, value: int):
+        if not isinstance(value, int):
+            raise ValueError("tokenizer_merges must be an integer.")
+        self._tokenizer_merges = value
+
+    @property
+    def lowercase(self) -> bool:
+        return self._lowercase
+
+    @lowercase.setter
+    def lowercase(self, value: bool):
+        if not isinstance(value, bool):
+            raise ValueError("lowercase must be a boolean.")
+        self._lowercase = value
+
+    @property
+    def tokenizer_output_dir(self) -> Optional[str]:
+        return self._tokenizer_output_dir
+
+    @tokenizer_output_dir.setter
+    def tokenizer_output_dir(self, value: str):
+        if not isinstance(value, str):
+            raise ValueError("tokenizer_output_dir must be a string.")
+        self._tokenizer_output_dir = self._resolve_path(value)
 
     def print_config_info(self):
         print("=" * 50)

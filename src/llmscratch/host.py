@@ -5,6 +5,7 @@ from llmscratch.exception import CustomException
 from llmscratch.logger_manager import LoggerManager
 from llmscratch.models.command_line_args import CommandLineArgs
 from llmscratch.pipelines.preprocessing_pipeline import PreprocessingPipeline
+from llmscratch.pipelines.tokenizer_training_pipeline import TokenizerTrainingPipeline
 
 logging = LoggerManager.get_logger(__name__)
 
@@ -39,9 +40,14 @@ class Host:
             if self.args.command == "preprocess":
                 logging.info("🧪 Executing LLM data preprocessing pipeline.")
                 await self.run_preprocess()
+            elif self.args.command == "train_tokenizer":
+                logging.info("✍️ Executing tokenizer training pipeline.")
+                await self.run_tokenizer_training()
             else:
                 logging.error(f"❌ Unknown subcommand: {self.args.command}")
-                raise ValueError("Please specify a valid subcommand: 'preprocess'.")
+                raise ValueError(
+                    "Please specify a valid subcommand: 'preprocess' or 'train_tokenizer'."
+                )
 
         except CustomException as e:
             logging.error("🔥 A custom error occurred: %s", e)
@@ -71,6 +77,21 @@ class Host:
             #     logging.info(f"📝 Saved output to: {output_path}")
 
             logging.info("✅ Preprocessing pipeline completed successfully.")
+
+        except Exception as e:
+            raise CustomException(e) from e
+
+    async def run_tokenizer_training(self):
+        """
+        Run the tokenizer training pipeline.
+        """
+        try:
+            logging.info("📚 Running tokenizer training pipeline...")
+
+            pipeline = TokenizerTrainingPipeline()
+            await pipeline.run()
+
+            logging.info("✅ Tokenizer training completed successfully.")
 
         except Exception as e:
             raise CustomException(e) from e
