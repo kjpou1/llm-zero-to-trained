@@ -106,9 +106,11 @@ class BPETrainer(BaseTrainer):
         For each word in the vocab, count the frequency of every adjacent symbol pair,
         weighted by the word's frequency.
 
-        This corresponds to:
-            "We iteratively count all symbol pairs and replace each occurrence of
-             the most frequent pair (‘A’, ‘B’) with a new symbol ‘AB’."
+        This is the preparatory step described in the BPE paper:
+            "We iteratively count all symbol pairs..."
+
+        The replacement or merge of the most frequent pair is handled in a separate step called _merge_vocab()
+        pair_counts = defaultdict(int)
 
         Args:
             vocab (Dict[Tuple[str, ...], int]): Current symbolized vocabulary.
@@ -116,7 +118,7 @@ class BPETrainer(BaseTrainer):
         Returns:
             Dict[Tuple[str, str], int]: Frequency counts of all adjacent pairs.
         """
-        pair_counts = defaultdict(int)
+
         for word, freq in vocab.items():
             for i in range(len(word) - 1):
                 pair = (word[i], word[i + 1])
@@ -128,7 +130,13 @@ class BPETrainer(BaseTrainer):
     ) -> Dict[Tuple[str, ...], int]:
         """
         Step 3: Merge the best pair throughout the vocab.
-        All occurrences of a pair (e.g. ('t', 'h')) are replaced with a single merged symbol ("th").
+
+        Implements the merge operation described in the BPE paper:
+            “We iteratively count all symbol pairs and replace each occurrence of
+             the most frequent pair (‘A’, ‘B’) with a new symbol ‘AB’.”
+
+        This function finds all occurrences of the most frequent symbol pair in the vocabulary
+        and replaces them with their merged form (e.g., ('t', 'h') → 'th').
 
         Args:
             pair (Tuple[str, str]): Most frequent symbol pair to merge.
