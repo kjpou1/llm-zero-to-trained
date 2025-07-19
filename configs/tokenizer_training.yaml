@@ -1,0 +1,8 @@
+# tokenizer_training.yaml
+
+# === Tokenizer Training Parameters ===
+tokenizer_merges: 10000       # Number of BPE merge operations
+lowercase: false              # Whether to lowercase words during preprocessing
+
+# === Output Directory (relative to BASE_DIR) ===
+#tokenizer_output_dir: data/vocabulary
