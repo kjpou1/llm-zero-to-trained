@@ -11,7 +11,11 @@ logging = LoggerManager.get_logger(__name__)
 
 class BPETrainer(BaseTrainer):
     """
-    Learns BPE merge operations from a word frequency dictionary.
+    Byte Pair Encoding (BPE) Trainer — based on:
+    "Neural Machine Translation of Rare Words with Subword Units" (Sennrich et al., 2016)
+
+    This trainer learns merge rules from word frequencies by iteratively merging the most frequent pair of symbols
+    in a vocabulary of character sequences augmented with a special end-of-word marker `</w>`.
     """
 
     def __init__(self, num_merges: int = 10000):
@@ -19,7 +23,8 @@ class BPETrainer(BaseTrainer):
         Initializes the BPE trainer.
 
         Args:
-            num_merges (int): The number of merge operations to perform. Controls subword vocab size.
+            num_merges (int): Number of BPE merge operations to perform.
+                              More merges = larger subword vocabulary.
         """
         self.num_merges = num_merges
         self.vocab: Dict[Tuple[str, ...], int] = {}
@@ -28,17 +33,24 @@ class BPETrainer(BaseTrainer):
 
     def fit(self, word_freqs: Dict[str, int]) -> List[Tuple[str, str]]:
         """
-        Learns BPE merge rules from the given word frequency dictionary.
+        Main BPE training loop:
+        - Convert word frequencies into character + `</w>` vocab.
+        - Iteratively find and merge the most frequent adjacent symbol pair.
+
+        From the paper:
+            "We represent each word as a sequence of characters plus a special end-of-word symbol,
+             and merge the most frequent symbol pair (‘A’, ‘B’) in the corpus, replacing each
+             occurrence of the pair with a new symbol ‘AB’."
 
         Args:
             word_freqs (Dict[str, int]): Dictionary mapping words to frequencies.
 
         Returns:
-            List[Tuple[str, str]]: List of merge operations in order.
+            List[Tuple[str, str]]: Ordered list of BPE merge operations.
         """
         logging.info("🚀 Starting BPE training...")
         self.vocab = self._init_vocab(word_freqs)
-        self.merges = []  # Reset in case trainer is reused
+        self.merges = []
         logging.info(f"🧱 Initialized vocab with {len(self.vocab)} entries.")
 
         for i in range(self.num_merges):
@@ -48,7 +60,10 @@ class BPETrainer(BaseTrainer):
                 logging.info(f"🛑 No more symbol pairs left after {i} merges.")
                 break
 
+            # Select most frequent pair
             best_pair = max(symbol_pairs, key=symbol_pairs.get)
+
+            # Replace best_pair everywhere in the vocab
             self.vocab = self._merge_vocab(best_pair, self.vocab)
             self.merges.append(best_pair)
 
@@ -62,23 +77,20 @@ class BPETrainer(BaseTrainer):
         )
         return self.merges
 
-    def log_statistics(self) -> None:
-        self._log_merge_statistics()
-
     def _init_vocab(self, word_freqs: Dict[str, int]) -> Dict[Tuple[str, ...], int]:
         """
-        Convert word-level frequency dict into character-symbol vocab for BPE.
+        Step 1: Initialize vocabulary.
+        Each word is converted into a tuple of characters plus a special end-of-word marker `</w>`.
 
-        Each word becomes a tuple of characters + a special end-of-word symbol `</w>`.
-
-        From the BPE paper:
-            “We represent each word as a sequence of characters plus a special end-of-word symbol, and merge the most frequent symbol pair.”
+        Example:
+            Input word = "lower"
+            Output tuple = ('l', 'o', 'w', 'e', 'r', '</w>')
 
         Args:
-            word_freqs (Dict[str, int]): Raw word frequencies.
+            word_freqs (Dict[str, int]): Input word frequency dictionary.
 
         Returns:
-            Dict[Tuple[str, ...], int]: Initialized vocab with character symbols.
+            Dict[Tuple[str, ...], int]: Initial symbolized vocabulary.
         """
         vocab = {}
         for word, freq in word_freqs.items():
@@ -86,25 +98,73 @@ class BPETrainer(BaseTrainer):
             vocab[symbols] = freq
         return vocab
 
-    def save_artifacts(self, output_path: str) -> None:
+    def _count_symbol_pairs(
+        self, vocab: Dict[Tuple[str, ...], int]
+    ) -> Dict[Tuple[str, str], int]:
         """
-        Save BPE vocab and merges to the specified directory.
+        Step 2: Count symbol pairs.
+        For each word in the vocab, count the frequency of every adjacent symbol pair,
+        weighted by the word's frequency.
+
+        This corresponds to:
+            "We iteratively count all symbol pairs and replace each occurrence of
+             the most frequent pair (‘A’, ‘B’) with a new symbol ‘AB’."
 
         Args:
-            output_path (str): Directory to save `vocab.txt` and `merges.txt`.
+            vocab (Dict[Tuple[str, ...], int]): Current symbolized vocabulary.
+
+        Returns:
+            Dict[Tuple[str, str], int]: Frequency counts of all adjacent pairs.
+        """
+        pair_counts = defaultdict(int)
+        for word, freq in vocab.items():
+            for i in range(len(word) - 1):
+                pair = (word[i], word[i + 1])
+                pair_counts[pair] += freq
+        return dict(pair_counts)
+
+    def _merge_vocab(
+        self, pair: Tuple[str, str], vocab: Dict[Tuple[str, ...], int]
+    ) -> Dict[Tuple[str, ...], int]:
+        """
+        Step 3: Merge the best pair throughout the vocab.
+        All occurrences of a pair (e.g. ('t', 'h')) are replaced with a single merged symbol ("th").
+
+        Args:
+            pair (Tuple[str, str]): Most frequent symbol pair to merge.
+            vocab (Dict[Tuple[str, ...], int]): Current vocabulary.
+
+        Returns:
+            Dict[Tuple[str, ...], int]: Updated vocabulary with merged pair.
+        """
+        merged_vocab = {}
+        bigram = re.escape(" ".join(pair))  # Regex-safe
+        pattern = re.compile(rf"(?<!\S){bigram}(?!\S)")
+
+        for word_tuple, freq in vocab.items():
+            word_str = " ".join(word_tuple)
+            new_word_str = pattern.sub("".join(pair), word_str)
+            new_word = tuple(new_word_str.split())
+            merged_vocab[new_word] = freq
+
+        return merged_vocab
+
+    def save_artifacts(self, output_path: str) -> None:
+        """
+        Save learned BPE vocabulary and merge rules to disk.
+
+        Args:
+            output_path (str): Output directory.
         """
         os.makedirs(output_path, exist_ok=True)
-
         vocab_path = os.path.join(output_path, "vocab.txt")
         merges_path = os.path.join(output_path, "merges.txt")
 
-        # Save vocab
         with open(vocab_path, "w", encoding="utf-8") as f:
             for word_tuple, freq in self.vocab.items():
-                word = "".join(word_tuple).replace("</w>", "")  # optional cleanup
+                word = "".join(word_tuple).replace("</w>", "")
                 f.write(f"{word} {freq}\n")
 
-        # Save merges
         with open(merges_path, "w", encoding="utf-8") as f:
             for a, b in self.merges:
                 f.write(f"{a} {b}\n")
@@ -112,66 +172,16 @@ class BPETrainer(BaseTrainer):
         logging.info(f"📁 Saved vocab to: {vocab_path}")
         logging.info(f"📁 Saved merges to: {merges_path}")
 
-    def _count_symbol_pairs(
-        self, vocab: Dict[Tuple[str, ...], int]
-    ) -> Dict[Tuple[str, str], int]:
-        """
-        Count frequency of all adjacent symbol pairs in the current BPE vocabulary.
-
-        Each word is a tuple of symbols (initially characters + </w>).
-        We count how many times each bigram (pair of symbols) appears,
-        weighted by the frequency of the word in which it appears.
-
-        Args:
-            vocab (Dict[Tuple[str, ...], int]): Current BPE vocabulary.
-
-        Returns:
-            Dict[Tuple[str, str], int]: Symbol pair → frequency mapping.
-        """
-        pair_counts = defaultdict(int)
-
-        for word, freq in vocab.items():
-            for i in range(len(word) - 1):
-                pair = (word[i], word[i + 1])
-                pair_counts[pair] += freq
-
-        return dict(pair_counts)
-
-    def _merge_vocab(
-        self, pair: Tuple[str, str], vocab: Dict[Tuple[str, ...], int]
-    ) -> Dict[Tuple[str, ...], int]:
-        """
-        Merge the most frequent symbol pair throughout the vocabulary.
-
-        Args:
-            pair (Tuple[str, str]): The symbol pair to merge (e.g. ('t', 'h')).
-            vocab (Dict[Tuple[str, ...], int]): Current vocabulary.
-
-        Returns:
-            Dict[Tuple[str, ...], int]: New vocabulary with merged symbols.
-        """
-        merged_vocab = {}
-        bigram = re.escape(" ".join(pair))  # e.g. "t h" → regex safe
-        pattern = re.compile(rf"(?<!\S){bigram}(?!\S)")  # match whole token pair only
-
-        for word_tuple, freq in vocab.items():
-            word_str = " ".join(word_tuple)
-            # Replace the pair with merged symbol
-            new_word_str = pattern.sub("".join(pair), word_str)
-            new_word = tuple(new_word_str.split())
-            merged_vocab[new_word] = freq
-
-        return merged_vocab
+    def log_statistics(self) -> None:
+        """Logs final vocabulary size and compression info."""
+        self._log_merge_statistics()
 
     def _log_merge_statistics(self) -> None:
         """
-        Logs statistics about the final vocabulary after BPE training.
-
-        Includes:
-        - Total unique words (vocab size)
-        - Total symbols (weighted by frequency)
-        - Average symbols per word
-        - Number of merge operations performed
+        Logs vocabulary compression metrics after BPE training:
+        - Number of entries in final vocab
+        - Merge operations performed
+        - Avg symbols per word (weighted by frequency)
         """
         if not self.vocab:
             logging.warning("⚠️ No vocabulary found. Run `fit()` first.")
