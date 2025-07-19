@@ -14,6 +14,7 @@ Unlike simply running code from the [reference repo](https://github.com/rasbt/LL
   - [🧰 Environment Setup (with uv)](#-environment-setup-with-uv)
   - [🚀 CLI: Start Building](#-cli-start-building)
   - [📚 References \& Inspirations](#-references--inspirations)
+  - [� Internal Documentation](#-internal-documentation)
   - [📜 License](#-license)
 
 ---
@@ -108,6 +109,14 @@ While the architecture is influenced by great projects, all code is original and
 * [minGPT](https://github.com/karpathy/minGPT)
 * [nanoGPT](https://github.com/karpathy/nanoGPT)
 * [Hugging Face Transformers](https://github.com/huggingface/transformers)
+
+---
+
+## 📄 Internal Documentation
+
+This project includes implementation-focused documentation aligned with academic papers and architectural design:
+
+* [`bpe_implementation.md`](docs/tokenizers/bpe_implementation.md) — Byte Pair Encoding (BPE) training process, aligned with Sennrich et al. (2015)
 
 ---
 
