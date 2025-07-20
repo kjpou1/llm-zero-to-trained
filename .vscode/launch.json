@@ -25,6 +25,13 @@
       "request": "launch",
       "program": "src/llmscratch/launch_host.py",
       "args": ["preprocess", "--config", "configs/preprocess_config.yaml"]
+    },
+    {
+      "name": "Train BPE",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "src/llmscratch/launch_host.py",
+      "args": ["train_tokenizer", "--config", "configs/tokenizer_training.yaml"]
     }
   ]
 }
