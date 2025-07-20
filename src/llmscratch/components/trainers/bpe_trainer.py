@@ -118,6 +118,7 @@ class BPETrainer(BaseTrainer):
         Returns:
             Dict[Tuple[str, str], int]: Frequency counts of all adjacent pairs.
         """
+        pair_counts = defaultdict(int)
 
         for word, freq in vocab.items():
             for i in range(len(word) - 1):
