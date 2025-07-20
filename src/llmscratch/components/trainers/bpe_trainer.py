@@ -3,6 +3,8 @@ import re
 from collections import defaultdict
 from typing import Dict, List, Tuple
 
+from tqdm import tqdm
+
 from llmscratch.components.trainers.base_trainer import BaseTrainer
 from llmscratch.logger_manager import LoggerManager
 
@@ -53,24 +55,27 @@ class BPETrainer(BaseTrainer):
         self.merges = []
         logging.info(f"🧱 Initialized vocab with {len(self.vocab)} entries.")
 
-        for i in range(self.num_merges):
-            symbol_pairs = self._count_symbol_pairs(self.vocab)
+        with tqdm(total=self.num_merges, desc="🧩 Merges", unit="merge") as pbar:
+            for i in range(self.num_merges):
+                symbol_pairs = self._count_symbol_pairs(self.vocab)
 
-            if not symbol_pairs:
-                logging.info(f"🛑 No more symbol pairs left after {i} merges.")
-                break
+                if not symbol_pairs:
+                    # logging.info(f"🛑 No more symbol pairs left after {i} merges.")
+                    break
 
-            # Select most frequent pair
-            best_pair = max(symbol_pairs, key=symbol_pairs.get)
+                # Select most frequent pair
+                best_pair = max(symbol_pairs, key=symbol_pairs.get)
 
-            # Replace best_pair everywhere in the vocab
-            self.vocab = self._merge_vocab(best_pair, self.vocab)
-            self.merges.append(best_pair)
+                # Replace best_pair everywhere in the vocab
+                self.vocab = self._merge_vocab(best_pair, self.vocab)
+                self.merges.append(best_pair)
 
-            if i % 100 == 0 or i == self.num_merges - 1:
-                logging.info(
-                    f"🔁 Merge {i+1}/{self.num_merges}: {best_pair} → {''.join(best_pair)}"
-                )
+                pbar.update(1)
+
+                # if i % 100 == 0 or i == self.num_merges - 1:
+                #     logging.info(
+                #         f"🔁 Merge {i+1}/{self.num_merges}: {best_pair} → {''.join(best_pair)}"
+                #     )
 
         logging.info(
             f"✅ Training complete. Learned {len(self.merges)} merge operations."

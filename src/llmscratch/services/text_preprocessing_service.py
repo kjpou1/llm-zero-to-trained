@@ -3,6 +3,7 @@ from collections import Counter
 from typing import Dict, List
 
 import spacy
+from tqdm import tqdm
 
 from llmscratch.components.io.text_loader import TextLoader
 from llmscratch.logger_manager import LoggerManager
@@ -53,19 +54,26 @@ class TextPreprocessingService:
         """
         Builds a word frequency dictionary from all .txt files in input_dir.
 
+        Args:
+            mode (str): File loading mode ('line' or 'full').
+            lowercase (bool): If True, convert words to lowercase.
+
         Returns:
             Dict[str, int]: Mapping from word → frequency.
         """
         word_counter = Counter()
 
         logging.info(f"📁 Scanning directory: {self.input_dir}")
-        for filename in os.listdir(self.input_dir):
-            if filename.endswith(".txt"):
-                file_path = os.path.join(self.input_dir, filename)
-                logging.info(f"📄 Processing file: {filename}")
-                for line in self.text_loader.load_text(file_path, mode=mode):
-                    words = self.split_line_into_words(line, lowercase=lowercase)
-                    word_counter.update(words)
+        files = [f for f in os.listdir(self.input_dir) if f.endswith(".txt")]
+
+        for filename in tqdm(files, desc="📂 Files", unit="file"):
+            file_path = os.path.join(self.input_dir, filename)
+            logging.info(f"📄 Processing file: {filename}")
+            lines = list(self.text_loader.load_text(file_path, mode=mode))
+
+            for line in tqdm(lines, desc=f"📄 {filename}", unit="line", leave=False):
+                words = self.split_line_into_words(line, lowercase=lowercase)
+                word_counter.update(words)
 
         logging.info(
             f"✅ Word frequency dictionary built with {len(word_counter)} unique words."
